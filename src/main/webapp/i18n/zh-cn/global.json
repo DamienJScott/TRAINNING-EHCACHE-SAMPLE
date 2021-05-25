@@ -51,7 +51,7 @@
         "authenticated": {
           "prefix": "如果您要",
           "link": "登录",
-          "suffix": ", 您可以使用默认账号:<br/>- 管理员 (账号=\"admin\"和密码=\"admin\") <br/>- 普通用户 (账号=\"user\"和密码=\"user\")."
+          "suffix": ", 或者点击页面右上角进行登录."
         },
         "register": {
           "noaccount": "您还没有账号",
@@ -136,5 +136,5 @@
       "not.image": "File was expected to be an image but was found to be \"{{ fileType }}\""
     }
   },
-  "footer": "这里是页脚"
+  "footer": "EHCache Sample , Copyright @ Damien_J"
 }

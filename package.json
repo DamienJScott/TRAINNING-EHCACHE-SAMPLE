@@ -29,6 +29,9 @@
     "ngx-infinite-scroll": "9.0.0",
     "ngx-webstorage": "5.0.0",
     "rxjs": "6.5.5",
+    "primeflex": "^2.0.0",
+    "primeicons": "^4.1.0",
+    "primeng": "^11.3.1",
     "swagger-ui-dist": "3.25.1",
     "tslib": "2.0.0",
     "zone.js": "0.10.3"

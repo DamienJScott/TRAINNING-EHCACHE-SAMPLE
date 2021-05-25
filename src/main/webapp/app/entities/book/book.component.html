@@ -2,10 +2,11 @@
     <h2 id="page-heading">
         <span jhiTranslate="ehcMonolithSampleApp.book.home.title">Books</span>
 
-        <button id="jh-create-entity" class="btn btn-primary float-right jh-create-entity create-book" [routerLink]="['/book/new']">
+        <button id="jh-create-entity" class="btn btn-primary float-right jh-create-entity create-book"
+            [routerLink]="['/book/new']">
             <fa-icon icon="plus"></fa-icon>
-            <span  jhiTranslate="ehcMonolithSampleApp.book.home.createLabel">
-            Create a new Book
+            <span jhiTranslate="ehcMonolithSampleApp.book.home.createLabel">
+                Create a new Book
             </span>
         </button>
     </h2>
@@ -13,6 +14,49 @@
     <ehc-alert-error></ehc-alert-error>
 
     <ehc-alert></ehc-alert>
+    <p-card styleClass="p-shadow-10 p-mt-6 p-mb-6 p-p-2">
+        <ng-template pTemplate="header">
+            <div class="p-d-flex p-ai-center p-jc-between">
+                <h2 class="p-text-bold p-m-3 " jhiTranslate="ehcMonolithSampleApp.book.searchCondition">Search
+                    Condition
+                </h2>
+                <div>
+                    <button pButton pRipple type="button" icon="pi pi-replay" (click)="resetCondition()"
+                        class="p-button-rounded p-mr-6 p-button-danger p-button-outlined"></button>
+                    <button pButton pRipple type="button" icon="pi pi-search" (click)="searching()"
+                        class="p-button-rounded p-mr-6 p-button-info p-button-outlined"></button>
+
+                </div>
+            </div>
+            <hr id="cutLine" class="p-d-none p-d-md-block">
+        </ng-template>
+        <form name="searchForm" role="form" novalidate [formGroup]="searchForm">
+            <div>
+                <div class="p-fluid p-formgrid p-grid">
+                    <div class="p-field p-col">
+                        <h5 jhiTranslate="ehcMonolithSampleApp.book.name">Name</h5>
+                        <input type="text" pInputText id="name" name="name" formControlName="name">
+                    </div>
+                    <div class="p-field p-col">
+                        <h5 jhiTranslate="ehcMonolithSampleApp.book.author">author</h5>
+                        <input type="text" pInputText id="author" name="author" formControlName="author">
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="p-fluid p-formgrid p-grid">
+                    <div class="p-field p-col">
+                        <h5 jhiTranslate="ehcMonolithSampleApp.book.position">Position</h5>
+                        <input type="text" pInputText id="position" name="position" formControlName="position">
+                    </div>
+                    <div class="p-field p-col">
+                        <h5 jhiTranslate="ehcMonolithSampleApp.book.detail">detail</h5>
+                        <input type="text" pInputText id="detail" name="detail" formControlName="detail">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </p-card>
 
     <div class="alert alert-warning" id="no-result" *ngIf="books?.length === 0">
         <span jhiTranslate="ehcMonolithSampleApp.book.home.notFound">No books found</span>
@@ -22,15 +66,29 @@
         <table class="table table-striped" aria-describedby="page-heading">
             <thead>
                 <tr jhiSort [(predicate)]="predicate" [(ascending)]="ascending" [callback]="reset.bind(this)">
-                    <th scope="col"  jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span> <fa-icon icon="sort"></fa-icon></th>
-                    <th scope="col"  jhiSortBy="name"><span jhiTranslate="ehcMonolithSampleApp.book.name">Name</span> <fa-icon icon="sort"></fa-icon></th>
-                    <th scope="col"  jhiSortBy="position"><span jhiTranslate="ehcMonolithSampleApp.book.position">Position</span> <fa-icon icon="sort"></fa-icon></th>
-                    <th scope="col"  jhiSortBy="author"><span jhiTranslate="ehcMonolithSampleApp.book.author">Author</span> <fa-icon icon="sort"></fa-icon></th>
-                    <th scope="col"  jhiSortBy="detail"><span jhiTranslate="ehcMonolithSampleApp.book.detail">Detail</span> <fa-icon icon="sort"></fa-icon></th>
+                    <th scope="col" jhiSortBy="id"><span jhiTranslate="global.field.id">ID</span>
+                        <fa-icon icon="sort"></fa-icon>
+                    </th>
+                    <th scope="col" jhiSortBy="name"><span jhiTranslate="ehcMonolithSampleApp.book.name">Name</span>
+                        <fa-icon icon="sort"></fa-icon>
+                    </th>
+                    <th scope="col" jhiSortBy="position"><span
+                            jhiTranslate="ehcMonolithSampleApp.book.position">Position</span>
+                        <fa-icon icon="sort"></fa-icon>
+                    </th>
+                    <th scope="col" jhiSortBy="author"><span
+                            jhiTranslate="ehcMonolithSampleApp.book.author">Author</span>
+                        <fa-icon icon="sort"></fa-icon>
+                    </th>
+                    <th scope="col" jhiSortBy="detail"><span
+                            jhiTranslate="ehcMonolithSampleApp.book.detail">Detail</span>
+                        <fa-icon icon="sort"></fa-icon>
+                    </th>
                     <th scope="col"></th>
                 </tr>
             </thead>
-            <tbody infinite-scroll (scrolled)="loadPage(page + 1)" [infiniteScrollDisabled]="page >= links['last']" [infiniteScrollDistance]="0">
+            <tbody infinite-scroll (scrolled)="loadPage(page + 1)" [infiniteScrollDisabled]="page >= links['last']"
+                [infiniteScrollDistance]="0">
                 <tr *ngFor="let book of books ;trackBy: trackId">
                     <td><a [routerLink]="['/book', book.id, 'view']">{{ book.id }}</a></td>
                     <td>{{ book.name }}</td>
@@ -39,22 +97,18 @@
                     <td>{{ book.detail }}</td>
                     <td class="text-right">
                         <div class="btn-group">
-                            <button type="submit"
-                                    [routerLink]="['/book', book.id, 'view']"
-                                    class="btn btn-info btn-sm">
+                            <button type="submit" [routerLink]="['/book', book.id, 'view']" class="btn btn-info btn-sm">
                                 <fa-icon icon="eye"></fa-icon>
                                 <span class="d-none d-md-inline" jhiTranslate="entity.action.view">View</span>
                             </button>
 
-                            <button type="submit"
-                                    [routerLink]="['/book', book.id, 'edit']"
-                                    class="btn btn-primary btn-sm">
+                            <button type="submit" [routerLink]="['/book', book.id, 'edit']"
+                                class="btn btn-primary btn-sm">
                                 <fa-icon icon="pencil-alt"></fa-icon>
                                 <span class="d-none d-md-inline" jhiTranslate="entity.action.edit">Edit</span>
                             </button>
 
-                            <button type="submit" (click)="delete(book)"
-                                    class="btn btn-danger btn-sm">
+                            <button type="submit" (click)="delete(book)" class="btn btn-danger btn-sm">
                                 <fa-icon icon="times"></fa-icon>
                                 <span class="d-none d-md-inline" jhiTranslate="entity.action.delete">Delete</span>
                             </button>

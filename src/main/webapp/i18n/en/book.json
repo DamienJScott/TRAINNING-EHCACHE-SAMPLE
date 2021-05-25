@@ -13,9 +13,10 @@
       "delete": {
         "question": "Are you sure you want to delete Book {{ id }}?"
       },
-      "detail": {
+      "details": {
         "title": "Book"
       },
+      "searchCondition": "Search Condition",
       "name": "Name",
       "position": "Position",
       "author": "Author",

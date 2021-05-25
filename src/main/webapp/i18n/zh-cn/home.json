@@ -1,19 +1,10 @@
 {
   "home": {
-    "title": "欢迎, Java Hipster!",
-    "subtitle": "这里是首页",
+    "title": "欢迎, EHCache 学习者!",
+    "subtitle": "这里是 EHCache 演示项目,你可以通过该项目的演示学习到 EHCache 的一些知识.",
     "logged": {
-      "message": "您目前是以 \"{{username}}\" 账号登录."
-    },
-    "question": "如果您有任何有关 JHipster 的问题, 可以查阅下列资源:",
-    "link": {
-      "homepage": "JHipster 首頁",
-      "stackoverflow": "Stack Overflow 上关于 JHipster 的讨论",
-      "bugtracker": "JHipster 的缺陷追踪",
-      "chat": "JHipster public chat room",
-      "follow": "在 Twitter 上联络 @jhipster"
-    },
-    "like": "如果您喜欢 JHipster, 请记得给我们加星在",
-    "github": "GitHub"
+      "message": "欢迎回来  \"{{username}}\".",
+      "welMsg": "您可以点击菜单来开始您的学习."
+    }
   }
 }
