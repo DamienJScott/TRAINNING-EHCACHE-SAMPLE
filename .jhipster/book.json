@@ -1,0 +1,37 @@
+{
+  "fields": [
+    {
+      "fieldId": 1,
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValues": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldId": 2,
+      "fieldName": "position",
+      "fieldType": "String",
+      "fieldValues": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldId": 3,
+      "fieldName": "author",
+      "fieldType": "String",
+      "fieldValues": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldId": 4,
+      "fieldName": "detail",
+      "fieldType": "String",
+      "fieldValues": "String"
+    }
+  ],
+  "changelogDate": "20210414124838",
+  "dto": "mapstruct",
+  "service": "serviceClass",
+  "pagination": "infinite-scroll",
+  "jpaMetamodelFiltering": true,
+  "searchEngine": false
+}
