@@ -18,6 +18,7 @@ import java.time.Instant;
  */
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
+    
 
     String USERS_BY_LOGIN_CACHE = "usersByLogin";
 
