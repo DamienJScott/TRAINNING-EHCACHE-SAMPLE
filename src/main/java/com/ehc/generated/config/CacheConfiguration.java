@@ -1,6 +1,7 @@
 package com.ehc.generated.config;
 
 import java.io.File;
+import java.net.URI;
 import java.time.Duration;
 
 import javax.cache.CacheManager;
@@ -9,6 +10,8 @@ import javax.cache.spi.CachingProvider;
 
 import com.ehc.generated.domain.User;
 
+import org.ehcache.clustered.client.config.builders.ClusteredResourcePoolBuilder;
+import org.ehcache.clustered.client.config.builders.ClusteringServiceConfigurationBuilder;
 import org.ehcache.config.builders.*;
 import org.ehcache.config.units.MemoryUnit;
 import org.ehcache.core.config.DefaultConfiguration;
@@ -46,31 +49,24 @@ public class CacheConfiguration {
     public CacheConfiguration(JHipsterProperties jHipsterProperties) {
         JHipsterProperties.Cache.Ehcache ehcache = jHipsterProperties.getCache().getEhcache();
 
-        jcacheConfiguration = Eh107Configuration
-                .fromEhcacheCacheConfiguration(
-                        CacheConfigurationBuilder
-                                .newCacheConfigurationBuilder(String.class, User.class,
-                                        ResourcePoolsBuilder.heap(ehcache.getMaxEntries()).disk(10, MemoryUnit.MB,
-                                                true))
-                                .withExpiry(ExpiryPolicyBuilder
-                                        .timeToLiveExpiration(Duration.ofSeconds(ehcache.getTimeToLiveSeconds())))
-                                .build());
+        jcacheConfiguration = Eh107Configuration.fromEhcacheCacheConfiguration(CacheConfigurationBuilder
+                .newCacheConfigurationBuilder(String.class, User.class,
+                        ResourcePoolsBuilder.heap(ehcache.getMaxEntries())
+                                .with(ClusteredResourcePoolBuilder.clusteredShared("resource-pool-a")))
+                .withExpiry(
+                        ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofSeconds(ehcache.getTimeToLiveSeconds())))
+                .build());
+
         CachingProvider cachingProvider = Caching.getCachingProvider();
         EhcacheCachingProvider ehcacheProvider = (EhcacheCachingProvider) cachingProvider;
         DefaultConfiguration configuration = new DefaultConfiguration(ehcacheProvider.getDefaultClassLoader(),
-                new DefaultPersistenceConfiguration(new File("D:/training/EHCache/cache")));
+                ClusteringServiceConfigurationBuilder.cluster(URI.create("terracotta://localhost:9410/clustered"))
+                        .autoCreate(c -> c.defaultServerResource("default-resource").resourcePool("resource-pool-a", 10, MemoryUnit.MB, "default-resource"))
+                        .build());
         CacheManager cacheManager = ehcacheProvider.getCacheManager(ehcacheProvider.getDefaultURI(), configuration);
 
         createCache(cacheManager, com.ehc.generated.repository.UserRepository.USERS_BY_LOGIN_CACHE);
         createCache(cacheManager, com.ehc.generated.repository.UserRepository.USERS_BY_EMAIL_CACHE);
-        cacheManager.createCache(com.ehc.generated.domain.Book.class.getName(),  Eh107Configuration
-        .fromEhcacheCacheConfiguration(
-                CacheConfigurationBuilder
-                        .newCacheConfigurationBuilder(Object.class, Object.class,
-                                ResourcePoolsBuilder.heap(ehcache.getMaxEntries()))
-                        .withExpiry(ExpiryPolicyBuilder
-                                .timeToLiveExpiration(Duration.ofSeconds(ehcache.getTimeToLiveSeconds())))
-                        .build()));
         jCacheCacheManager = new JCacheCacheManager(cacheManager);
     }
 
