@@ -52,6 +52,7 @@ public class CacheConfiguration {
         jcacheConfiguration = Eh107Configuration.fromEhcacheCacheConfiguration(CacheConfigurationBuilder
                 .newCacheConfigurationBuilder(String.class, User.class,
                         ResourcePoolsBuilder.heap(ehcache.getMaxEntries())
+                                // .disk(10, MemoryUnit.MB, true)
                                 .with(ClusteredResourcePoolBuilder.clusteredShared("resource-pool-a")))
                 .withExpiry(
                         ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofSeconds(ehcache.getTimeToLiveSeconds())))
@@ -60,8 +61,10 @@ public class CacheConfiguration {
         CachingProvider cachingProvider = Caching.getCachingProvider();
         EhcacheCachingProvider ehcacheProvider = (EhcacheCachingProvider) cachingProvider;
         DefaultConfiguration configuration = new DefaultConfiguration(ehcacheProvider.getDefaultClassLoader(),
+                // new DefaultPersistenceConfiguration(new File("D:/training/EHCache/cache")),
                 ClusteringServiceConfigurationBuilder.cluster(URI.create("terracotta://localhost:9410/clustered"))
-                        .autoCreate(c -> c.defaultServerResource("default-resource").resourcePool("resource-pool-a", 10, MemoryUnit.MB, "default-resource"))
+                        .autoCreate(c -> c.defaultServerResource("default-resource").resourcePool("resource-pool-a", 10,
+                                MemoryUnit.MB, "default-resource"))
                         .build());
         CacheManager cacheManager = ehcacheProvider.getCacheManager(ehcacheProvider.getDefaultURI(), configuration);
 
