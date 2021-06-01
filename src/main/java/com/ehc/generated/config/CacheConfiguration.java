@@ -8,6 +8,8 @@ import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
 
+import com.ehc.generated.domain.Authority;
+import com.ehc.generated.domain.Book;
 import com.ehc.generated.domain.User;
 
 import org.ehcache.clustered.client.config.builders.ClusteredResourcePoolBuilder;
@@ -22,20 +24,15 @@ import org.hibernate.cache.jcache.ConfigSettings;
 import io.github.jhipster.config.JHipsterProperties;
 import org.ehcache.jsr107.EhcacheCachingProvider;
 
-import org.springframework.boot.autoconfigure.cache.JCacheManagerCustomizer;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.info.GitProperties;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.jcache.JCacheCacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import io.github.jhipster.config.cache.PrefixedKeyGenerator;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.cloud.client.serviceregistry.Registration;
 import org.springframework.context.annotation.*;
 
 @Configuration
@@ -43,34 +40,54 @@ import org.springframework.context.annotation.*;
 public class CacheConfiguration {
     private GitProperties gitProperties;
     private BuildProperties buildProperties;
-    private final javax.cache.configuration.Configuration<String, User> jcacheConfiguration;
     private JCacheCacheManager jCacheCacheManager;
 
     public CacheConfiguration(JHipsterProperties jHipsterProperties) {
-        JHipsterProperties.Cache.Ehcache ehcache = jHipsterProperties.getCache().getEhcache();
+        createCaches(createManager(), jHipsterProperties);
+    }
 
-        jcacheConfiguration = Eh107Configuration.fromEhcacheCacheConfiguration(CacheConfigurationBuilder
-                .newCacheConfigurationBuilder(String.class, User.class,
-                        ResourcePoolsBuilder.heap(ehcache.getMaxEntries())
+    private <K, V> javax.cache.configuration.Configuration<K, V> creatConfig(Class<K> key, Class<V> value,
+            JHipsterProperties.Cache.Ehcache ehcache) {
+        return Eh107Configuration.fromEhcacheCacheConfiguration(CacheConfigurationBuilder
+                .newCacheConfigurationBuilder(key, value,
+                        ResourcePoolsBuilder.heap(ehcache.getMaxEntries()).offheap(5, MemoryUnit.MB)
                                 // .disk(10, MemoryUnit.MB, true)
                                 .with(ClusteredResourcePoolBuilder.clusteredShared("resource-pool-a")))
                 .withExpiry(
                         ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofSeconds(ehcache.getTimeToLiveSeconds())))
                 .build());
+    }
 
+    private CacheManager createManager() {
         CachingProvider cachingProvider = Caching.getCachingProvider();
         EhcacheCachingProvider ehcacheProvider = (EhcacheCachingProvider) cachingProvider;
         DefaultConfiguration configuration = new DefaultConfiguration(ehcacheProvider.getDefaultClassLoader(),
-                // new DefaultPersistenceConfiguration(new File("D:/training/EHCache/cache")),
+                // new DefaultPersistenceConfiguration(new File("D:/training/EHCache/cache"))
                 ClusteringServiceConfigurationBuilder.cluster(URI.create("terracotta://localhost:9410/clustered"))
                         .autoCreate(c -> c.defaultServerResource("default-resource").resourcePool("resource-pool-a", 10,
                                 MemoryUnit.MB, "default-resource"))
                         .build());
         CacheManager cacheManager = ehcacheProvider.getCacheManager(ehcacheProvider.getDefaultURI(), configuration);
-
-        createCache(cacheManager, com.ehc.generated.repository.UserRepository.USERS_BY_LOGIN_CACHE);
-        createCache(cacheManager, com.ehc.generated.repository.UserRepository.USERS_BY_EMAIL_CACHE);
         jCacheCacheManager = new JCacheCacheManager(cacheManager);
+        return cacheManager;
+    } 
+
+    private void createCaches(javax.cache.CacheManager cm, JHipsterProperties jHipsterProperties) {
+        JHipsterProperties.Cache.Ehcache ehcache = jHipsterProperties.getCache().getEhcache();
+        createCache(cm, com.ehc.generated.repository.UserRepository.USERS_BY_LOGIN_CACHE,
+                creatConfig(String.class, Object.class, ehcache));
+        createCache(cm, com.ehc.generated.repository.UserRepository.USERS_BY_EMAIL_CACHE,
+                creatConfig(String.class, Object.class, ehcache));
+        createCache(cm, com.ehc.generated.domain.User.class.getName(),
+                creatConfig(Object.class, Object.class, ehcache));
+        createCache(cm, com.ehc.generated.domain.Authority.class.getName(),
+                creatConfig(Object.class, Object.class, ehcache));
+        createCache(cm, com.ehc.generated.domain.User.class.getName() + ".authorities",
+                creatConfig(Object.class, Object.class, ehcache));
+        createCache(cm, com.ehc.generated.domain.Book.class.getName(),
+                creatConfig(Object.class, Object.class, ehcache));
+        createCache(cm, "byId", creatConfig(Long.class, String.class, ehcache));
+        createCache(cm, "combine", creatConfig(Long.class, String.class, ehcache));
     }
 
     @Bean
@@ -88,57 +105,11 @@ public class CacheConfiguration {
         return jCacheCacheManager.getCacheManager();
     }
 
-    // createCache(cm,
-    // com.ehc.generated.repository.UserRepository.USERS_BY_LOGIN_CACHE);
-    // createCache(cm,
-    // com.ehc.generated.repository.UserRepository.USERS_BY_EMAIL_CACHE);
-    // createCache(cm, com.ehc.generated.domain.User.class.getName());
-    // createCache(cm, com.ehc.generated.domain.Authority.class.getName());
-    // createCache(cm, com.ehc.generated.domain.User.class.getName() +
-    // ".authorities");
-    // createCache(cm, com.ehc.generated.domain.Book.class.getName());
-
-    // @Bean
-    // public JCacheManagerCustomizer cacheManagerCustomizer() {
-    // return new JCacheManagerCustomizers(jcacheConfiguration);
-    // }
-
-    // private static class JCacheManagerCustomizers implements
-    // JCacheManagerCustomizer {
-
-    // private final javax.cache.configuration.Configuration<String, User>
-    // jcacheConfiguration;
-
-    // public
-    // JCacheManagerCustomizers(javax.cache.configuration.Configuration<String,
-    // User> jcacheConfiguration) {
-    // this.jcacheConfiguration = jcacheConfiguration;
-    // }
-
-    // @Override
-    // public void customize(CacheManager cacheManager) {
-    // EhcacheCachingProvider ehcacheCachingProvider = (EhcacheCachingProvider)
-    // cacheManager.getCachingProvider();
-    // DefaultConfiguration configuration = new DefaultConfiguration(
-    // ehcacheCachingProvider.getDefaultClassLoader(),
-    // new DefaultPersistenceConfiguration(new File("D:/training/EHCache/cache")));
-    // cacheManager =
-    // ehcacheCachingProvider.getCacheManager(ehcacheCachingProvider.getDefaultURI(),
-    // configuration);
-
-    // createCache(cacheManager,
-    // com.ehc.generated.repository.UserRepository.USERS_BY_LOGIN_CACHE);
-    // createCache(cacheManager,
-    // com.ehc.generated.repository.UserRepository.USERS_BY_EMAIL_CACHE);
-
-    // }
-
-    // }
-
-    private void createCache(javax.cache.CacheManager cm, String cacheName) {
+    private void createCache(javax.cache.CacheManager cm, String cacheName,
+            javax.cache.configuration.Configuration<?, ?> configuration) {
         javax.cache.Cache<Object, Object> cache = cm.getCache(cacheName);
         if (cache == null) {
-            cm.createCache(cacheName, jcacheConfiguration);
+            cm.createCache(cacheName, configuration);
         }
     }
 
